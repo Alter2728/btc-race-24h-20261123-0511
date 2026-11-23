@@ -35,6 +35,10 @@ const NO_ENTRY_AFTER = 1320;
 const FALLBACK_BAR = 1350;
 const MAX_SLIPPAGE_BPS = 100;
 const BPS_DEN = 10_000n;
+/** The two window lengths as bigints, hoisted: the comparisons below run on
+ * every bar and should not rebuild them. */
+const FAST_B = BigInt(FAST);
+const SLOW_B = BigInt(SLOW);
 
 /** Every close seen so far for the traded symbol, in batch order. */
 const closes: bigint[] = [];
@@ -60,13 +64,13 @@ function pushClose(c: bigint): void {
 
 /** sumFast/FAST > sumSlow/SLOW, exactly, with no division. */
 function uptrend(): boolean {
-  return sumFast * BigInt(SLOW) > sumSlow * BigInt(FAST);
+  return sumFast * SLOW_B > sumSlow * FAST_B;
 }
 
 
 /** Latest close strictly above the fast average, exactly. */
 function aboveFast(c: bigint): boolean {
-  return c * BigInt(FAST) > sumFast;
+  return c * FAST_B > sumFast;
 }
 
 /** True when `c` sits at least `bps` below `ref`. */
